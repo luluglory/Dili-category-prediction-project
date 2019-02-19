@@ -1,0 +1,129 @@
+---
+title: "Bayes Model"
+output: html_document
+---
+
+## Import the library
+```{r}
+library(xlsx)
+library(ggplot2)
+library(ggthemes)
+library(tidyr)
+```
+
+## Import the dataset
+```{r}
+getwd()
+setwd('C:/Users/morty/Desktop/study/Capstone')
+getwd()
+Dili <-read.csv('medNAS_dili_tt.csv') 
+View(Dili)
+colnames(Dili)
+```
+
+
+## Explore the dataset
+```{r}
+summary(Dili)
+unique(Dili$tgt_abbr)
+unique(Dili$chnm)
+unique(Dili$Classification)
+
+```
+
+
+## count the number of drugs(Todrug), target(Totaeget), Diliclass(Toclass)
+```{r}
+Todrug <- length(Dili$chnm)
+Totarget <- length(Dili$tgt_abbr)
+Toclass <- length(Dili$Classification)
+```
+
+## Get the unique value of target
+```{r}
+Target <- c(as.character(unique(Dili$tgt_abbr)))
+
+```
+
+```{r}
+Target <- c(as.character(unique(Dili$tgt_abbr)))
+length(unique(Target))
+```
+
+## calculate the probability of the occurence of each target PT.
+```{r}
+P_target <- c()
+for (i in Target){
+  P_target[i] <- sum(Dili$tgt_abbr==i)
+  PT <- c(P_target/Totarget)
+}
+```
+
+## Create the dataframe PTdf have the target name and probability of the occurence of each target (Vlaue).
+```{r}
+PTdf <- data.frame(target = Target, value = PT)
+PTdf
+```
+
+## Create the dataframe PTdf have the target name and probability of the occurence of each class (Vlaue). PD is P(Dili category)
+```{r}
+DILIC <- c(as.character(unique(Dili$Classification)))
+P_DILI <- c()
+for (i in DILIC){
+  P_DILI[i] <- sum(Dili$Classification==i)
+  PD <- c(P_DILI/Toclass)
+}
+PDdf <- data.frame(target = DILIC, value = PD)
+PDdf
+```
+
+## count the number of sample for each dili catagory
+```{r}
+MDILI <- Dili[Dili$Classification == 'MostDILI Drugs',]
+ADILI <- Dili[Dili$Classification == 'AmbiDILIDrugs',]
+LDILI <- Dili[Dili$Classification == 'LessDILIDrugs',]
+NDILI <- Dili[Dili$Classification == 'NoDILI Drugs',]
+```
+
+
+## Create the dataframe PTdf have the target name and probability of the conditional situation that when the dili catagory is mostdili the probability of the occurance of each target. PMT is P(target|mostdili)
+```{r}
+totalM <- length(MDILI$tgt_abbr)
+MTarget <- c(as.character(unique(MDILI$tgt_abbr)))
+P_Mtarget <- c()
+for (i in MTarget){
+  P_Mtarget[i] <- sum(MDILI$tgt_abbr==i)
+  PMT <- c(P_Mtarget/totalM)
+}
+PMTdf <- data.frame(target = MTarget, value = PMT)
+PMTdf
+```
+
+
+
+## Calculate the conditional probability P(mostdili | target)
+```{r}
+ProTM <- c()
+for(x in PTdf$target){
+  for(y in PMTdf$target){
+    if(x == y){
+      ProTM[y] <- PMTdf[y,'value']*PDdf['MostDILI Drugs','value']/PTdf[x,'value']
+    }
+  }
+}
+ProTMdf <-data.frame(target = PMTdf$target, value = ProTM) 
+```
+
+```{r}
+ProTMdf
+```
+
+```{r}
+OProTmdf<-ProTMdf[order(-ProTMdf$value),]
+OProTmdf
+```
+
+```{r}
+ggplot(data=OProTmdf,mapping=aes(x=target,y=value,group=factor(1)))+
+  geom_bar(stat="identity")
+```
