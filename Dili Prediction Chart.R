@@ -167,3 +167,115 @@ TvsDili2 <- merge(TvsDili1,LDC2, by.x = "target", by.y = "target",all=TRUE)
 TvsDili <- merge(TvsDili2,NDC2, by.x = "target", by.y = "target",all=TRUE)
 TvsDili[is.na(TvsDili)]<-0
 
+write.xlsx(TvsDili, "Dili category & Assay target association table.xlsx")
+
+## graph of conditional probability P(mostdili | target)
+ggplot(ProTMdf,aes(x=reorder(target,value),y=value,fill=ProTMdf$value))+
+  geom_bar(stat='identity')+
+  labs (x= "Target", y = 'P(mostdili | target)')+
+  theme(panel.background=element_rect('white'))+
+  theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
+  theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
+  theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
+  theme(axis.text.x=element_text(size=8,colour="gray40",face = "bold", vjust = 0, hjust = 1,angle = 90))+
+  theme(axis.text.y=element_text(size=15,colour="gray40",face = "bold"))+
+  theme(plot.margin=unit(rep(2,4),'lines'))+
+  theme(axis.line = element_line(size=1, colour = 'black'))
+
+## graph of conditional probability P(Ambidili | target)
+ggplot(ProTAdf,aes(x=reorder(target,value),y=value,fill=ProTAdf$value))+
+  geom_bar(stat='identity')+
+  labs (x= "Target", y = 'P(Ambidili | target)')+
+  theme(panel.background=element_rect('white'))+
+  theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
+  theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
+  theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
+  theme(axis.text.x=element_text(size=8,colour="gray40",face = "bold", vjust = 0, hjust = 1,angle = 90))+
+  theme(axis.text.y=element_text(size=15,colour="gray40",face = "bold"))+
+  theme(plot.margin=unit(rep(2,4),'lines'))+
+  theme(axis.line = element_line(size=1, colour = 'black'))
+
+## graph of conditional probability P(LessDili | target)
+ggplot(ProTLdf,aes(x=reorder(target,value),y=value,fill=ProTLdf$value))+
+  geom_bar(stat='identity')+
+  labs (x= "Target", y = 'P(LessDili | target)')+
+  theme(panel.background=element_rect('white'))+
+  theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
+  theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
+  theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
+  theme(axis.text.x=element_text(size=8,colour="gray40",face = "bold", vjust = 0, hjust = 1,angle = 90))+
+  theme(axis.text.y=element_text(size=15,colour="gray40",face = "bold"))+
+  theme(plot.margin=unit(rep(2,4),'lines'))+
+  theme(axis.line = element_line(size=1, colour = 'black'))
+
+## graph of conditional probability P(NoDili | target)
+ggplot(ProTNdf,aes(x=reorder(target,value),y=value,fill=ProTNdf$value))+
+  geom_bar(stat='identity')+
+  labs (x= "Target", y = 'P(NoDili | target)')+
+  theme(panel.background=element_rect('white'))+
+  theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
+  theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
+  theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
+  theme(axis.text.x=element_text(size=8,colour="gray40",face = "bold", vjust = 0, hjust = 1,angle = 90))+
+  theme(axis.text.y=element_text(size=15,colour="gray40",face = "bold"))+
+  theme(plot.margin=unit(rep(2,4),'lines'))+
+  theme(axis.line = element_line(size=1, colour = 'black'))
+
+## Get the Perdiction Result
+DiliT <- Dili
+for (i in DiliT$tgt_abbr){
+  for (y in MDC$target){
+    if (i==y){
+      DiliT[DiliT$tgt_abbr==i,'Test_C']='MostDILI Drugs'
+    }
+  }
+}
+
+for (i in DiliT$tgt_abbr){
+  for (y in ADC$target){
+    if (i==y){
+      DiliT[DiliT$tgt_abbr==i,'Test_C']='AmbiDILIDrugs'
+    }
+  }
+}
+
+for (i in DiliT$tgt_abbr){
+  for (y in LDC$target){
+    if (i==y){
+      DiliT[DiliT$tgt_abbr==i,'Test_C']='LessDILIDrugs'
+    }
+  }
+}
+
+for (i in DiliT$tgt_abbr){
+  for (y in NDC$target){
+    if (i==y){
+      DiliT[DiliT$tgt_abbr==i,'Test_C']='NoDILI Drugs'
+    }
+  }
+}
+DiliT1 <- na.omit(DiliT)
+DiliT_dup <- DiliT1[!duplicated(DiliT1[,c('chnm','Test_C')]),]
+DiliTM1 <- DiliT_dup[DiliT_dup$Test_C=='MostDILI Drugs',]
+DiliTA1 <- DiliT_dup[DiliT_dup$Test_C=='AmbiDILIDrugs',]
+DiliTL1 <- DiliT_dup[DiliT_dup$Test_C=='LessDILIDrugs',]
+DiliTN1 <- DiliT_dup[DiliT_dup$Test_C=='NoDILI Drugs',]
+
+
+DiliTM1['MostDILI']=1
+DiliTA1['AmbiDILI']=1
+DiliTL1['LessDILI']=1
+DiliTN1['NoDILI']=1
+
+DiliTM <- DiliTM1[,c('chnm','MostDILI')]
+DiliTA <- DiliTA1[,c('chnm','AmbiDILI')]
+DiliTL <- DiliTL1[,c('chnm','LessDILI')]
+DiliTN <- DiliTN1[,c('chnm','NoDILI')]
+
+TvsC1 <- merge(DiliTM,DiliTA, by.x = "chnm", by.y = "chnm",all=TRUE)
+TvsC2 <- merge(TvsC1,DiliTL, by.x = "chnm", by.y = "chnm",all=TRUE)
+TvsC3 <- merge(TvsC2,DiliTN, by.x = "chnm", by.y = "chnm",all=TRUE)
+DrDlCl <- DiliT_dup[,c("chnm",'Classification')]
+TvsC <- merge(TvsC3,DrDlCl, by.x = "chnm", by.y = "chnm",all=TRUE)
+TvsC[is.na(TvsC)] <- 0
+
