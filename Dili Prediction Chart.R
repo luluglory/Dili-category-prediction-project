@@ -172,8 +172,9 @@ write.xlsx(TvsDili, "Dili category & Assay target association table.xlsx")
 ## graph of conditional probability P(mostdili | target)
 ggplot(ProTMdf,aes(x=reorder(target,value),y=value,fill=ProTMdf$value))+
   geom_bar(stat='identity')+
-  labs (x= "Target", y = 'P(mostdili | target)')+
+  labs (title = 'P(MOST DILI | Target)',x= "Target", y = 'P(mostdili | target)')+
   theme(panel.background=element_rect('white'))+
+  theme(title =element_text(size = 40,face = "bold",hjust = 0.5))+
   theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
   theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
   theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
@@ -185,8 +186,9 @@ ggplot(ProTMdf,aes(x=reorder(target,value),y=value,fill=ProTMdf$value))+
 ## graph of conditional probability P(Ambidili | target)
 ggplot(ProTAdf,aes(x=reorder(target,value),y=value,fill=ProTAdf$value))+
   geom_bar(stat='identity')+
-  labs (x= "Target", y = 'P(Ambidili | target)')+
+  labs (title = 'P(Ambi DILI | Target)',x= "Target", y = 'P(Ambidili | target)')+
   theme(panel.background=element_rect('white'))+
+  theme(title =element_text(size = 40,face = "bold",hjust = 0.5))+
   theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
   theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
   theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
@@ -198,8 +200,9 @@ ggplot(ProTAdf,aes(x=reorder(target,value),y=value,fill=ProTAdf$value))+
 ## graph of conditional probability P(LessDili | target)
 ggplot(ProTLdf,aes(x=reorder(target,value),y=value,fill=ProTLdf$value))+
   geom_bar(stat='identity')+
-  labs (x= "Target", y = 'P(LessDili | target)')+
+  labs (title = 'P(LESS DILI | Target)',x= "Target", y = 'P(LessDili | target)')+
   theme(panel.background=element_rect('white'))+
+  theme(title =element_text(size = 40,face = "bold",hjust = 0.5))+
   theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
   theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
   theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
@@ -211,8 +214,9 @@ ggplot(ProTLdf,aes(x=reorder(target,value),y=value,fill=ProTLdf$value))+
 ## graph of conditional probability P(NoDili | target)
 ggplot(ProTNdf,aes(x=reorder(target,value),y=value,fill=ProTNdf$value))+
   geom_bar(stat='identity')+
-  labs (x= "Target", y = 'P(NoDili | target)')+
+  labs (title = 'P(No DILI | Target)',x= "Target", y = 'P(NoDili | target)')+
   theme(panel.background=element_rect('white'))+
+  theme(title =element_text(size = 40,face = "bold",hjust = 0.5))+
   theme(axis.title.x = element_text(size = 20,face = "bold", vjust = 3, hjust = 0.5))+
   theme(axis.title.y = element_text(size = 20,face = "bold", vjust = 5, hjust = 0.5))+
   theme(panel.grid.major=element_line(colour='lightgrey',linetype="dashed"))+
@@ -278,4 +282,101 @@ TvsC3 <- merge(TvsC2,DiliTN, by.x = "chnm", by.y = "chnm",all=TRUE)
 DrDlCl <- DiliT_dup[,c("chnm",'Classification')]
 TvsC <- merge(TvsC3,DrDlCl, by.x = "chnm", by.y = "chnm",all=TRUE)
 TvsC[is.na(TvsC)] <- 0
+
+#Conditional Probability of each Dili Category based on target.
+ProTMdf['MostDili'] <- ProTMdf$value
+CPM <- ProTMdf[,c('target','MostDili')]
+ProTAdf['AmbiDili'] <- ProTAdf$value
+APM <- ProTAdf[,c('target','AmbiDili')]
+ProTLdf['LessDili'] <- ProTLdf$value
+LPM <- ProTLdf[,c('target','LessDili')]
+ProTNdf['NoDili'] <- ProTNdf$value
+NPM <- ProTNdf[,c('target','NoDili')]
+
+CD_DiliT1 <- merge(CPM,APM, by.x = "target", by.y = "target",all=TRUE)
+CD_DiliT2 <- merge(CD_DiliT1,LPM, by.x = "target", by.y = "target",all=TRUE)
+CD_DiliT <- merge(CD_DiliT2,NPM, by.x = "target", by.y = "target",all=TRUE)
+CD_DiliT[is.na(CD_DiliT)] <- 0 
+
+CD_DiliTX <- CD_DiliT[CD_DiliT$MostDili!=0.5&CD_DiliT$AmbiDili!=0.5&CD_DiliT$LessDili!=0.5&CD_DiliT$NoDili!=0.5,]
+
+#Predict the Dili category
+for (i in rownames(CD_DiliTX)){
+  CD_DiliTX[i,'MAX']= max(CD_DiliTX[i,'MostDili'],CD_DiliTX[i,'AmbiDili'],CD_DiliTX[i,'LessDili'],CD_DiliTX[i,'NoDili'])
+}
+
+for (i in rownames(CD_DiliTX)){
+  if (CD_DiliTX[i,'MostDili']==CD_DiliTX[i,'MAX']){
+    CD_DiliTX[i,'Dili_Category']='MostDili'
+  }
+  else if (CD_DiliTX[i,'AmbiDili']==CD_DiliTX[i,'MAX']){
+    CD_DiliTX[i,'Dili_Category']='AmbiDili'
+  }
+  else if (CD_DiliTX[i,'LessDili']==CD_DiliTX[i,'MAX']){
+    CD_DiliTX[i,'Dili_Category']='LessDili'
+  }
+  else if (CD_DiliTX[i,'NoDili']==CD_DiliTX[i,'MAX']){
+    CD_DiliTX[i,'Dili_Category']='NoDili'
+  }
+}
+
+PredM <- CD_DiliTX[,c('target','Dili_Category')]
+
+DiliWT <- Dili
+for (i in DiliWT$tgt_abbr){
+  for (y in PredM[PredM$Dili_Category=='MostDili','target']){
+    if (i==y){
+      DiliWT[DiliWT$tgt_abbr==i,'Test_C']='MostDILI Drugs'
+    }
+  }
+}
+
+for (i in DiliWT$tgt_abbr){
+  for (y in PredM[PredM$Dili_Category=='AmbiDili','target']){
+    if (i==y){
+      DiliWT[DiliWT$tgt_abbr==i,'Test_C']='AmbiDILI Drugs'
+    }
+  }
+}
+
+for (i in DiliWT$tgt_abbr){
+  for (y in PredM[PredM$Dili_Category=='LessDili','target']){
+    if (i==y){
+      DiliWT[DiliWT$tgt_abbr==i,'Test_C']='LessDILI Drugs'
+    }
+  }
+}
+
+for (i in DiliWT$tgt_abbr){
+  for (y in PredM[PredM$Dili_Category=='NoDili','target']){
+    if (i==y){
+      DiliWT[DiliWT$tgt_abbr==i,'Test_C']='NoDILI Drugs'
+    }
+  }
+}
+
+DiliWT1 <- na.omit(DiliWT)
+DiliWT_dup <- DiliWT1[!duplicated(DiliWT1[,c('chnm','Test_C')]),]
+DiliWTM1 <- DiliWT_dup[DiliWT_dup$Test_C=='MostDILI Drugs',]
+DiliWTA1 <- DiliWT_dup[DiliWT_dup$Test_C=='AmbiDILI Drugs',]
+DiliWTL1 <- DiliWT_dup[DiliWT_dup$Test_C=='LessDILI Drugs',]
+DiliWTN1 <- DiliWT_dup[DiliWT_dup$Test_C=='NoDILI Drugs',]
+
+DiliWTM1['MostDILI']=1
+DiliWTA1['AmbiDILI']=1
+DiliWTL1['LessDILI']=1
+DiliWTN1['NoDILI']=1
+
+DiliWTM <- DiliWTM1[,c('chnm','MostDILI')]
+DiliWTA <- DiliWTA1[,c('chnm','AmbiDILI')]
+DiliWTL <- DiliWTL1[,c('chnm','LessDILI')]
+DiliWTN <- DiliWTN1[,c('chnm','NoDILI')]
+
+TvsCW1 <- merge(DiliWTM,DiliWTA, by.x = "chnm", by.y = "chnm",all=TRUE)
+TvsCW2 <- merge(TvsCW1,DiliWTL, by.x = "chnm", by.y = "chnm",all=TRUE)
+TvsCW3 <- merge(TvsCW2,DiliWTN, by.x = "chnm", by.y = "chnm",all=TRUE)
+DrDlCl <- DiliWT_dup[,c("chnm",'Classification')]
+DrDLC1 <- DrDlCl[!duplicated(DrDlCl[,c('chnm','Classification')]),]
+TvsCW <- merge(TvsCW3,DrDLC1, by.x = "chnm", by.y = "chnm",all=TRUE)
+TvsCW[is.na(TvsCW)] <- 0                                                                           
 
