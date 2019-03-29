@@ -121,7 +121,7 @@ for(x in PTLdf$target){
 ProTLLdf <-data.frame(value = ProTLL)
 ProTLLdf['target']=rownames(ProTLLdf)
 
-## Calculate the conditional probability P(Ambidili | target)
+## Calculate the conditional probability P(Nodili | target)
 NTarget <- c(as.character(unique(NDILI$Tgt_level)))
 P_Ntarget <- c()
 for (i in NTarget){
@@ -174,7 +174,7 @@ TLvsDili <- merge(TLvsDili2,NDC2, by.x = "target", by.y = "target",all=TRUE)
 TLvsDili[is.na(TLvsDili)]<-0
 TLvsDiliout <- separate(TLvsDili,col=target,into = c('target','Act_level'),sep = ',')
 
-## graph of conditional probability P(mostdili | target)
+## graph of conditional probability P(mostdili | target with activate level)
 ggplot(ProTMLdf,aes(x=reorder(target,value),y=value,fill=ProTMLdf$value))+
   geom_bar(stat='identity')+
   labs (title = 'P(MOST DILI | Target&Activation Level',x= "Target", y = 'P(mostdili | target with activate level)')+
@@ -188,7 +188,7 @@ ggplot(ProTMLdf,aes(x=reorder(target,value),y=value,fill=ProTMLdf$value))+
   theme(plot.margin=unit(rep(2,4),'lines'))+
   theme(axis.line = element_line(size=1, colour = 'black'))
 
-## graph of conditional probability P(mostdili | target)
+## graph of conditional probability P(Ambidili | target with activate level)
 ggplot(ProTALdf,aes(x=reorder(target,value),y=value,fill=ProTALdf$value))+
   geom_bar(stat='identity')+
   labs (title = 'P(Ambi DILI | Target&Activation Level)',x= "Target", y = 'P(Ambidili | target with activate level)')+
@@ -202,7 +202,7 @@ ggplot(ProTALdf,aes(x=reorder(target,value),y=value,fill=ProTALdf$value))+
   theme(plot.margin=unit(rep(2,4),'lines'))+
   theme(axis.line = element_line(size=1, colour = 'black'))
 
-## graph of conditional probability P(mostdili | target)
+## graph of conditional probability P(Lessdili | target with activate level)
 ggplot(ProTLLdf,aes(x=reorder(target,value),y=value,fill=ProTLLdf$value))+
   geom_bar(stat='identity')+
   labs (title = 'P(LESS DILI | Target&Activation Level)',x= "Target", y = 'P(Lessdili | target with activate level)')+
@@ -216,7 +216,7 @@ ggplot(ProTLLdf,aes(x=reorder(target,value),y=value,fill=ProTLLdf$value))+
   theme(plot.margin=unit(rep(2,4),'lines'))+
   theme(axis.line = element_line(size=1, colour = 'black'))
 
-## graph of conditional probability P(mostdili | target)
+## graph of conditional probability P(Nodili | target with activate level)
 ggplot(ProTNLdf,aes(x=reorder(target,value),y=value,fill=ProTNLdf$value))+
   geom_bar(stat='identity')+
   labs (title = 'P(No DILI | Target&Activation Level)',x= "Target", y = 'P(Nodili | target with activate level)')+
